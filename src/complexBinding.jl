@@ -9,11 +9,10 @@ end
 
 
 function polyc(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Ctheta::Vector, Kav::Matrix)
-    (nl, nr) = size(Kav)
     ncplx = size(Cplx, 1)
-    @assert size(Cplx, 2) == nl
+    @assert size(Cplx, 2) == size(Kav, 1)
     @assert ncplx == length(Ctheta)
-    @assert nr == length(Rtot)
+    @assert size(Kav, 2) == length(Rtot)
     Ctheta /= sum(Ctheta)
 
     ansType = promote_type(typeof(L0), typeof(KxStar), eltype(Rtot), eltype(Ctheta))
