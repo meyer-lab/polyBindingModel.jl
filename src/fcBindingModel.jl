@@ -9,28 +9,6 @@ mutable struct fcOutput{T}
 end
 
 
-function Req_Regression(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC, Kav)
-    ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
-
-    Av = transpose(Kav) * IgGC * KxStar
-    f! = (F, x) -> F .= x + L0 * f / KxStar .* (x .* Av) .* (1 + sum(x .* Av))^(f - 1) - Rtot
-
-    x0 = convert(Vector{ansType}, Rtot / 1.1)
-
-    local solve_res
-    try
-        solve_res = nlsolve(f!, x0, method = :newton, autodiff = :forward, iterations = 5000)
-        @assert solve_res.f_converged == true
-        @assert all(solve_res.zero .<= Rtot .+ 1.0e-12)
-        @assert all(-1.0e-12 .<= solve_res.zero)
-    catch e
-        println("Req solving failed")
-        rethrow(e)
-    end
-
-    return solve_res.zero
-end
-
 function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix, ActI = nothing)
     # Data consistency check
     (ni, nr) = size(Kav)
@@ -38,7 +16,12 @@ function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, K
     @assert nr == length(Rtot)
     IgGC /= sum(IgGC)
 
-    Req = Req_Regression(L0, KxStar, f, Rtot, IgGC, Kav)
+    ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
+
+    Av = transpose(Kav) * IgGC * KxStar
+    f! = (F, x) -> F .= x + L0 * f / KxStar .* (x .* Av) .* (1 + sum(x .* Av))^(f - 1) - Rtot
+
+    Req = rootSolve(f!, convert(Vector{ansType}, Rtot))
 
     ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
     Phi = ones(ansType, ni, nr + 1) .* IgGC

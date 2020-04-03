@@ -7,14 +7,6 @@ function Req_func(Req::Vector, L0::Real, KxStar::Real, Rtot::Vector, Cplx::Abstr
     return Req .+ Rbound .- Rtot
 end
 
-function Req_Regression(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Ctheta::Vector, Kav::Matrix)
-    f! = (F, x) -> F .= Req_func(x, L0, KxStar, Rtot, Cplx, Ctheta, Kav)
-    solve_res = nlsolve(f!, Rtot .* 0.9, method = :newton, autodiff = :forward, iterations = 500)
-    @assert solve_res.f_converged == true
-    @assert all(solve_res.zero .<= Rtot)
-    @assert all(solve_res.zero .> 0.0)
-    return solve_res.zero
-end
 
 function polyc(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Ctheta::Vector, Kav::Matrix)
     (nl, nr) = size(Kav)
@@ -25,8 +17,8 @@ function polyc(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Cthet
     Ctheta /= sum(Ctheta)
 
     ansType = promote_type(typeof(L0), typeof(KxStar), eltype(Rtot), eltype(Ctheta))
-    Rtot = ansType.(Rtot)
-    Req = Req_Regression(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    f! = (F, x) -> F .= Req_func(x, L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    Req = rootSolve(f!, convert(Vector{ansType}, Rtot))
 
     Psi = Kav .* transpose(Req) .* KxStar
     PsiRS = sum(Psi, dims = 2) .+ 1.0
