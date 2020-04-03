@@ -27,22 +27,24 @@ end
     for i = 1:10
         L0 = rand() * 10.0^rand(-15:-5)
         KxStar = rand() * 10.0^rand(-15:-5)
-        f = rand(2:20)
-        nl = rand(1:10)
-        nr = rand(1:10)
+        f = rand(2:6)
+        nl = rand(1:6)
+        nr = rand(1:6)
+
         Rtot = floor.(100 .+ rand(nr) .* (10 .^ rand(4:6, nr)))
         LigC = rand(nl) .* (10 .^ rand(1:2, nl))
         Kav = rand(nl, nr) .* (10 .^ rand(3:7, nl, nr))
 
         old_res = polyfc(L0, KxStar, f, Rtot, LigC, Kav)
         new_res = polyfc_via_polyc(L0, KxStar, f, Rtot, LigC, Kav)
+
         @test old_res.Lbound ≈ new_res[1]
         @test old_res.Rbound ≈ new_res[2]
     end
 end
 
 @testset "complexBinding can take ForwardDiff" begin
-    L0 = 1.0e-8
+    L0 = 1.0e-9
     KxStar = 1.2e-10
     Rtot = [100.0, 1000.0, 10.0, 10000.0]
     Cplx = [1 0 3; 2 2 0; 1 1 2; 4 0 0]
