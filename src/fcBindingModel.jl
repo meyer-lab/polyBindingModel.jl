@@ -19,7 +19,7 @@ function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, K
     ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
 
     Av = transpose(Kav) * IgGC * KxStar
-    f! = (F, x) -> F .= x + L0 * f / KxStar .* (x .* Av) .* (1 + sum(x .* Av))^(f - 1) - Rtot
+    f! = (F, x) -> @. F = x + L0 * f / KxStar * (x * Av) * (1 + sum(x * Av))^(f - 1) - Rtot
 
     Req = rootSolve(f!, convert(Vector{ansType}, Rtot))
 
