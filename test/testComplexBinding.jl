@@ -78,3 +78,16 @@ end
         @test length(out) == length(Ltheta)
     end
 end
+
+@testset "Lfbnd in complexBinding is the same as Lbound" begin
+    L0 = 1.0e-10
+    KxStar = 1.2e-11
+    Rtot = [100.0, 1000.0, 400.0, 6000.0]
+    Cplx = [1 0 0; 0 1 0; 0 0 1]
+    Ctheta = rand(3)
+    Ctheta = Ctheta / sum(Ctheta)
+    Kav = rand(3, 4) * 1.0e7
+
+    out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    @test out[1] == out[3]
+end
