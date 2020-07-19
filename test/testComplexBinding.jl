@@ -79,7 +79,7 @@ end
     end
 end
 
-@testset "Lfbnd in complexBinding is the same as Lbound" begin
+@testset "Test Lfbnd in complexBinding when f=1 anf f=2" begin
     L0 = 1.0e-10
     KxStar = 1.2e-11
     Rtot = [100.0, 1000.0, 400.0, 6000.0]
@@ -90,4 +90,11 @@ end
 
     out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
     @test out[1] == out[3]
+    @test out[1] == out[4]
+
+    Cplx = [2 0 0; 0 2 0; 0 0 2; 1 1 0; 1 0 1; 0 1 1]
+    Ctheta = rand(6)
+    Ctheta = Ctheta / sum(Ctheta)
+    out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    @test out[1] == out[3] + out[4]
 end
