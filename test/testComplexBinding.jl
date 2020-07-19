@@ -38,8 +38,8 @@ end
         old_res = polyfc(L0, KxStar, f, Rtot, LigC, Kav)
         new_res = polyfc_via_polyc(L0, KxStar, f, Rtot, LigC, Kav)
 
-        @test old_res.Lbound ≈ new_res[1]
-        @test old_res.Rbound ≈ new_res[2]
+        @test old_res.Lbound ≈ sum(new_res[1])
+        @test old_res.Rbound ≈ sum(new_res[2])
     end
 end
 
@@ -54,25 +54,25 @@ end
     Ltheta = L0 .* Ctheta
 
     for i = 1:2
-        func = x -> polyc(x, KxStar, Rtot, Cplx, Ctheta, Kav)[i]
+        func = x -> sum(polyc(x, KxStar, Rtot, Cplx, Ctheta, Kav)[i])
         out = ForwardDiff.derivative(func, L0)
         @test typeof(out) == Float64
 
-        func = x -> polyc(L0, x, Rtot, Cplx, Ctheta, Kav)[i]
+        func = x -> sum(polyc(L0, x, Rtot, Cplx, Ctheta, Kav)[i])
         out = ForwardDiff.derivative(func, KxStar)
         @test typeof(out) == Float64
 
-        func = x -> polyc(L0, KxStar, x, Cplx, Ctheta, Kav)[i]
+        func = x -> sum(polyc(L0, KxStar, x, Cplx, Ctheta, Kav)[i])
         out = ForwardDiff.gradient(func, Rtot)
         @test eltype(out) == Float64
         @test length(out) == length(Rtot)
 
-        func = x -> polyc(L0, KxStar, Rtot, Cplx, x, Kav)[i]
+        func = x -> sum(polyc(L0, KxStar, Rtot, Cplx, x, Kav)[i])
         out = ForwardDiff.gradient(func, Ctheta)
         @test eltype(out) == Float64
         @test length(out) == length(Ctheta)
 
-        func = x -> polycm(KxStar, Rtot, Cplx, x, Kav)[i]
+        func = x -> sum(polycm(KxStar, Rtot, Cplx, x, Kav)[i])
         out = ForwardDiff.gradient(func, Ltheta)
         @test eltype(out) == Float64
         @test length(out) == length(Ltheta)
@@ -82,19 +82,19 @@ end
 @testset "Test Lfbnd in complexBinding when f=1 and f=2" begin
     L0 = 1.0e-10
     KxStar = 1.2e-11
-    Rtot = [100.0, 1000.0, 400.0, 6000.0]
+    Rtot = floor.(100 .+ rand(4) .* (10 .^ rand(4:7, 4)))
     Cplx = [1 0 0; 0 1 0; 0 0 1]
     Ctheta = rand(3)
     Ctheta = Ctheta / sum(Ctheta)
     Kav = rand(3, 4) * 1.0e7
 
     out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
-    @test out[1] ≈ out[3]
-    @test out[1] ≈ out[4]
+    @test all(out[1] .≈ out[3])
+    @test all(out[1] .≈ out[4])
 
     Cplx = [2 0 0; 0 2 0; 0 0 2; 1 1 0; 1 0 1; 0 1 1]
     Ctheta = rand(6)
     Ctheta = Ctheta / sum(Ctheta)
     out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
-    @test out[1] ≈ out[3] + out[4]
+    @test all(out[1] .≈ out[3] + out[4])
 end

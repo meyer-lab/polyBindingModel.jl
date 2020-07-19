@@ -21,11 +21,15 @@ function polyc(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Cthet
 
     Psi = Kav .* transpose(Req) .* KxStar
     PsiRS = sum(Psi, dims = 2) .+ 1.0
-    Lbound = L0 / KxStar * sum(Ctheta .* expm1.(Cplx * log1p.(PsiRS .- 1)))
-    Rbound = L0 / KxStar * sum(Ctheta .* (Cplx * (1 .- 1 ./ PsiRS)) .* exp.(Cplx * log.(PsiRS)))
-    Lfbnd = L0 / KxStar * sum(Ctheta .* exp.(Cplx * log.(PsiRS .- 1.0)))
-    Lmbnd = L0 / KxStar * sum(Ctheta .* Cplx * (PsiRS .- 1))
-    return Lbound, Rbound, Lfbnd, Lmbnd
+    Lbounds = L0 / KxStar * Ctheta .* expm1.(Cplx * log1p.(PsiRS .- 1))
+    Rbounds = L0 / KxStar * dropdims(sum(Ctheta .* Cplx * (Psi ./ PsiRS) .* exp.(Cplx * log1p.(PsiRS .- 1)), dims = 1), dims = 1)
+    Lfbnds = L0 / KxStar * Ctheta .* exp.(Cplx * log.(PsiRS .- 1.0))
+    Lmbnds = L0 / KxStar * Ctheta .* Cplx * (PsiRS .- 1)
+
+    @assert sum(Rbounds) ≈ L0 / KxStar * sum(Ctheta .* (Cplx * (1 .- 1 ./ PsiRS)) .* exp.(Cplx * log.(PsiRS)))
+    @assert length(Lbounds) == ncplx
+    @assert length(Rbounds) == length(Rtot)
+    return Lbounds, Rbounds, Lfbnds, Lmbnds
 end
 
 polycm = (KxStar, Rtot, Cplx, Ltheta, Kav) -> polyc(sum(Ltheta), KxStar, Rtot, Cplx, Ltheta ./ sum(Ltheta), Kav)
