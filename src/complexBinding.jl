@@ -24,7 +24,7 @@ function polyc(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Cthet
     Lbound = L0 / KxStar * sum(Ctheta .* expm1.(Cplx * log1p.(PsiRS .- 1)))
     Rbound = L0 / KxStar * sum(Ctheta .* (Cplx * (1 .- 1 ./ PsiRS)) .* exp.(Cplx * log.(PsiRS)))
     Lfbnd = L0 / KxStar * sum(Ctheta .* exp.(Cplx * log.(PsiRS .- 1.0)))
-    Lmbnd = L0 / KxStar * sum(Ctheta .* Cplx * (PsiRS.-1))
+    Lmbnd = L0 / KxStar * sum(Ctheta .* Cplx * (PsiRS .- 1))
     return Lbound, Rbound, Lfbnd, Lmbnd
 end
 
