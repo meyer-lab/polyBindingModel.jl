@@ -6,6 +6,7 @@ mutable struct fcOutput{T}
     ActV::T
     Req::Vector{T}
     Rbound_n::Vector{T}
+    Rmulti_n::Vector{T}
 end
 
 
@@ -36,13 +37,13 @@ function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, K
         NaN,
         Req,
         vec(L0 / KxStar * f .* Phisum_n * (1 + Phisum)^(f - 1)),
+        vec(L0 / KxStar * f .* Phisum_n * ((1 + Phisum)^(f - 1) - 1)),
     )
 
     if ActI != nothing
         ActI = vec(ActI)
         @assert nr == length(ActI)
-        Rmulti_n = L0 / KxStar * f .* Phisum_n * ((1 + Phisum)^(f - 1) - 1)
-        w.ActV = max(dot(Rmulti_n, ActI), 0.0)
+        w.ActV = max(dot(w.Rmulti_n, ActI), 0.0)
     end
     return w
 end

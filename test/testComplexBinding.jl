@@ -23,7 +23,7 @@ function polyfc_via_polyc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, LigC:
 end
 
 
-@testset "Give the same results as fcBindingModel" begin
+@testset "Give the same results as randomBinding" begin
     for i = 1:10
         L0 = rand() * 10.0^rand(-15:-5)
         KxStar = rand() * 10.0^rand(-15:-5)

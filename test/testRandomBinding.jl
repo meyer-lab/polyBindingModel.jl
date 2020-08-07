@@ -1,4 +1,4 @@
-@testset "fcBindingModel.jl tests" begin
+@testset "randomBinding.jl tests" begin
     L0 = 1.0e-8
     KxStar = 1.0e-10
     f = 4
@@ -45,6 +45,7 @@
         @test all(out.Rbound_n .≈ comp)
         @test all(out.Rbound_n .+ out.Req .≈ Rtot)
         @test out.Rmulti == 0.0
+        @test all(out.Rmulti_n .== 0.0)
         @test out.ActV == 0.0
     end
 end

@@ -20,7 +20,7 @@ function rootSolve(f!, Rtot)
 end
 
 
-include("fcBindingModel.jl")
+include("randomBinding.jl")
 include("complexBinding.jl")
 
 export polyfc, polyc, polycm, polyfcm

@@ -5,5 +5,5 @@ using Random
 using ForwardDiff
 using LinearAlgebra
 
-include("testBindingModel.jl")
+include("testRandomBinding.jl")
 include("testComplexBinding.jl")
