@@ -53,7 +53,7 @@ end
     Kav = rand(3, 4) * 1.0e7
     Ltheta = L0 .* Ctheta
 
-    for i = 1:2
+    for i = 1:4
         func = x -> sum(polyc(x, KxStar, Rtot, Cplx, Ctheta, Kav)[i])
         out = ForwardDiff.derivative(func, L0)
         @test typeof(out) == Float64
@@ -79,22 +79,34 @@ end
     end
 end
 
-@testset "Test Lfbnd in complexBinding when f=1 and f=2" begin
+@testset "Test Lfbnd in complexBinding when f = 1, 2, 3" begin
     L0 = 1.0e-10
-    KxStar = 1.2e-11
+    KxStar = 1.2e-12
     Rtot = floor.(100 .+ rand(4) .* (10 .^ rand(4:7, 4)))
+    Kav = rand(3, 4) * 1.0e7
+
+    # f = 1
     Cplx = [1 0 0; 0 1 0; 0 0 1]
     Ctheta = rand(3)
     Ctheta = Ctheta / sum(Ctheta)
-    Kav = rand(3, 4) * 1.0e7
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    @test all(Lbounds .≈ Lfbnds)
+    @test all(Lbounds .≈ sum(Rbounds, dims=2))
+    @test all(Lbounds .≈ Lmbnds)
 
-    out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
-    @test all(out[1] .≈ out[3])
-    @test all(out[1] .≈ out[4])
-
+    # f = 2
     Cplx = [2 0 0; 0 2 0; 0 0 2; 1 1 0; 1 0 1; 0 1 1]
     Ctheta = rand(6)
     Ctheta = Ctheta / sum(Ctheta)
-    out = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
-    @test all(out[1] .≈ out[3] + out[4])
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    @test all(Lbounds .≈ Lfbnds + Lmbnds)
+    @test all(sum(Rbounds, dims=2) .≈ Lfbnds * 2 + Lmbnds)
+
+    # f = 3
+    Cplx = [3 0 0; 2 1 0; 2 0 1; 1 2 0; 1 1 1; 1 0 2; 0 3 0; 0 2 1; 0 1 2; 0 0 3]
+    Ctheta = rand(10)
+    Ctheta = Ctheta / sum(Ctheta)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    Lbbnds = Lbounds - Lfbnds - Lmbnds
+    @test all(sum(Rbounds, dims=2) .≈ Lfbnds * 3 + Lbbnds * 2 + Lmbnds)
 end

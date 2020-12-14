@@ -22,13 +22,14 @@ function polyc(L0::Real, KxStar::Real, Rtot::Vector, Cplx::AbstractMatrix, Cthet
     Psi = Kav .* transpose(Req) .* KxStar
     PsiRS = sum(Psi, dims = 2) .+ 1.0
     Lbounds = L0 / KxStar * Ctheta .* expm1.(Cplx * log1p.(PsiRS .- 1))
-    Rbounds = L0 / KxStar * dropdims(sum(Ctheta .* Cplx * (Psi ./ PsiRS) .* exp.(Cplx * log1p.(PsiRS .- 1)), dims = 1), dims = 1)
+    Rbounds = L0 / KxStar * Ctheta .* Cplx * (Psi ./ PsiRS) .* exp.(Cplx * log1p.(PsiRS .- 1))
     Lfbnds = L0 / KxStar * Ctheta .* exp.(Cplx * log.(PsiRS .- 1.0))
     Lmbnds = L0 / KxStar * Ctheta .* Cplx * (PsiRS .- 1)
 
     @assert sum(Rbounds) ≈ L0 / KxStar * sum(Ctheta .* (Cplx * (1 .- 1 ./ PsiRS)) .* exp.(Cplx * log.(PsiRS)))
     @assert length(Lbounds) == ncplx
-    @assert length(Rbounds) == length(Rtot)
+    @assert size(Rbounds, 1) == length(Ctheta)
+    @assert size(Rbounds, 2) == length(Rtot)
     return Lbounds, Rbounds, Lfbnds, Lmbnds
 end
 
