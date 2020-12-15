@@ -91,7 +91,7 @@ end
     Ctheta = Ctheta / sum(Ctheta)
     Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
     @test all(Lbounds .≈ Lfbnds)
-    @test all(Lbounds .≈ sum(Rbounds, dims=2))
+    @test all(Lbounds .≈ sum(Rbounds, dims = 2))
     @test all(Lbounds .≈ Lmbnds)
 
     # f = 2
@@ -100,7 +100,7 @@ end
     Ctheta = Ctheta / sum(Ctheta)
     Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
     @test all(Lbounds .≈ Lfbnds + Lmbnds)
-    @test all(sum(Rbounds, dims=2) .≈ Lfbnds * 2 + Lmbnds)
+    @test all(sum(Rbounds, dims = 2) .≈ Lfbnds * 2 + Lmbnds)
 
     # f = 3
     Cplx = [3 0 0; 2 1 0; 2 0 1; 1 2 0; 1 1 1; 1 0 2; 0 3 0; 0 2 1; 0 1 2; 0 0 3]
@@ -108,5 +108,5 @@ end
     Ctheta = Ctheta / sum(Ctheta)
     Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
     Lbbnds = Lbounds - Lfbnds - Lmbnds
-    @test all(sum(Rbounds, dims=2) .≈ Lfbnds * 3 + Lbbnds * 2 + Lmbnds)
+    @test all(sum(Rbounds, dims = 2) .≈ Lfbnds * 3 + Lbbnds * 2 + Lmbnds)
 end
