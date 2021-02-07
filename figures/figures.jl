@@ -4,6 +4,7 @@ Pkg.add("Gadfly")
 Pkg.add("Compose")
 Pkg.instantiate()
 
+using polyBindingModel
 using Gadfly
 using Compose
 X = rand(10)
