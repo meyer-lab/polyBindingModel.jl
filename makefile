@@ -1,6 +1,6 @@
-all: figures
+all: figure
 
-figures:
+figure:
 	julia -e 'include("figures/figures.jl")'
 
 clean:
