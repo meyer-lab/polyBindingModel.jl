@@ -3,14 +3,13 @@ mutable struct fcOutput{T}
     Lbound::T
     Rbound::T
     Rmulti::T
-    ActV::T
     Req::Vector{T}
     Rbound_n::Vector{T}
     Rmulti_n::Vector{T}
 end
 
 
-function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix, ActI = nothing)
+function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix)
     # Data consistency check
     (ni, nr) = size(Kav)
     @assert ni == length(IgGC)
@@ -20,7 +19,7 @@ function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, K
     ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
 
     Av = transpose(Kav) * IgGC * KxStar
-    f! = (F, x) -> F .= x + L0 * f / KxStar .* (x .* Av) .* (1 + sum(x .* Av))^(f - 1) - Rtot
+    f! = (F, x) -> F .= x + L0 * f / KxStar .* (x .* Av) * (1 + sum(x .* Av))^(f - 1) - Rtot
 
     Req = rootSolve(f!, convert(Vector{ansType}, Rtot))
 
@@ -34,18 +33,11 @@ function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, K
         L0 / KxStar * ((1 + Phisum)^f - 1),
         L0 / KxStar * f * Phisum * (1 + Phisum)^(f - 1),
         L0 / KxStar * f * Phisum * ((1 + Phisum)^(f - 1) - 1),
-        NaN,
         Req,
         vec(L0 / KxStar * f .* Phisum_n * (1 + Phisum)^(f - 1)),
         vec(L0 / KxStar * f .* Phisum_n * ((1 + Phisum)^(f - 1) - 1)),
     )
-
-    if ActI != nothing
-        ActI = vec(ActI)
-        @assert nr == length(ActI)
-        w.ActV = max(dot(w.Rmulti_n, ActI), 0.0)
-    end
     return w
 end
 
-polyfcm = (KxStar, f, Rtot, IgG, Kav, ActI = nothing) -> polyfc(sum(IgG) / f, KxStar, f, Rtot, IgG ./ sum(IgG), Kav, ActI)
+polyfcm = (KxStar, f, Rtot, IgG, Kav) -> polyfc(sum(IgG) / f, KxStar, f, Rtot, IgG ./ sum(IgG), Kav)
