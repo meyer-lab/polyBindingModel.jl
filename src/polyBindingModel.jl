@@ -1,7 +1,6 @@
 module polyBindingModel
 
 using NLsolve
-using LinearAlgebra
 
 
 function rootSolve(f!, Rtot)

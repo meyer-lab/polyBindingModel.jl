@@ -1,4 +1,18 @@
-import Combinatorics.multinomial
+
+"""
+multinomial(k...)
+Multinomial coefficient where `n = sum(k)`.
+"""
+function multinomial(k...)
+    s = 0
+    result = 1
+    @inbounds for i in k
+        s += i
+        result *= binomial(s, i)
+    end
+    result
+end
+
 
 function vec_comb(length, rsum, resid)
     if length <= 1
@@ -87,26 +101,23 @@ end
 
     # f = 1
     Cplx = [1 0 0; 0 1 0; 0 0 1]
-    Ctheta = rand(3)
-    Ctheta = Ctheta / sum(Ctheta)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    θ = rand(3)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
     @test all(Lbounds .≈ Lfbnds)
     @test all(Lbounds .≈ sum(Rbounds, dims = 2))
     @test all(Lbounds .≈ Lmbnds)
 
     # f = 2
     Cplx = [2 0 0; 0 2 0; 0 0 2; 1 1 0; 1 0 1; 0 1 1]
-    Ctheta = rand(6)
-    Ctheta = Ctheta / sum(Ctheta)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    θ = rand(6)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
     @test all(Lbounds .≈ Lfbnds + Lmbnds)
     @test all(sum(Rbounds, dims = 2) .≈ Lfbnds * 2 + Lmbnds)
 
     # f = 3
     Cplx = [3 0 0; 2 1 0; 2 0 1; 1 2 0; 1 1 1; 1 0 2; 0 3 0; 0 2 1; 0 1 2; 0 0 3]
-    Ctheta = rand(10)
-    Ctheta = Ctheta / sum(Ctheta)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    θ = rand(10)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
     Lbbnds = Lbounds - Lfbnds - Lmbnds
     @test all(sum(Rbounds, dims = 2) .≈ Lfbnds * 3 + Lbbnds * 2 + Lmbnds)
 end
