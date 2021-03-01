@@ -27,13 +27,13 @@ function vec_comb(length, rsum, resid)
     return enum
 end
 
-function polyfc_via_polyc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, LigC::Vector, Kav::Matrix)
+function polyfc_via_polyc(Req, L0::Real, KxStar::Real, f::Number, Rtot::Vector, LigC::Vector, Kav::Matrix)
     LigC /= sum(LigC)
     Cplx = vec_comb(length(LigC), f, repeat([f], length(LigC)))'
     Ctheta = exp.(Cplx * log.(LigC)) .* [multinomial(x...) for x in eachrow(Cplx)]
     @assert sum(Ctheta) ≈ 1.0 "Ctheta is $(Ctheta) with sum $(sum(Ctheta)) != 1.0"
 
-    return polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    return polyc_Req(Req, L0, KxStar, Rtot, Cplx, Ctheta, Kav)
 end
 
 
@@ -50,7 +50,7 @@ end
         Kav = rand(nl, nr) .* (10 .^ rand(3:7, nl, nr))
 
         old_res = polyfc(L0, KxStar, f, Rtot, LigC, Kav)
-        new_res = polyfc_via_polyc(L0, KxStar, f, Rtot, LigC, Kav)
+        new_res = polyfc_via_polyc(old_res.Req, L0, KxStar, f, Rtot, LigC, Kav)
 
         @test old_res.Lbound ≈ sum(new_res[1])
         @test isapprox(old_res.Rbound, sum(new_res[2]), rtol = 1e-5)

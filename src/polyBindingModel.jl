@@ -22,6 +22,6 @@ end
 include("randomBinding.jl")
 include("complexBinding.jl")
 
-export polyfc, polyc, polycm, polyfcm
+export polyfc, polyc, polycm, polyfcm, polyc_Req
 
 end # module
