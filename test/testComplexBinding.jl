@@ -1,4 +1,18 @@
-import Combinatorics.multinomial
+
+"""
+multinomial(k...)
+Multinomial coefficient where `n = sum(k)`.
+"""
+function multinomial(k...)
+    s = 0
+    result = 1
+    @inbounds for i in k
+        s += i
+        result *= binomial(s, i)
+    end
+    result
+end
+
 
 function vec_comb(length, rsum, resid)
     if length <= 1
@@ -13,13 +27,13 @@ function vec_comb(length, rsum, resid)
     return enum
 end
 
-function polyfc_via_polyc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, LigC::Vector, Kav::Matrix)
+function polyfc_via_polyc(Req, L0::Real, KxStar::Real, f::Number, Rtot::Vector, LigC::Vector, Kav::Matrix)
     LigC /= sum(LigC)
     Cplx = vec_comb(length(LigC), f, repeat([f], length(LigC)))'
     Ctheta = exp.(Cplx * log.(LigC)) .* [multinomial(x...) for x in eachrow(Cplx)]
     @assert sum(Ctheta) ≈ 1.0 "Ctheta is $(Ctheta) with sum $(sum(Ctheta)) != 1.0"
 
-    return polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    return polyc_Req(Req, L0, KxStar, Rtot, Cplx, Ctheta, Kav)
 end
 
 
@@ -27,19 +41,19 @@ end
     for i = 1:10
         L0 = rand() * 10.0^rand(-15:-5)
         KxStar = rand() * 10.0^rand(-15:-5)
-        f = rand(2:6)
-        nl = rand(1:6)
-        nr = rand(1:6)
+        f = rand(2:5)
+        nl = rand(1:5)
+        nr = rand(1:5)
 
         Rtot = floor.(100 .+ rand(nr) .* (10 .^ rand(4:6, nr)))
         LigC = rand(nl) .* (10 .^ rand(1:2, nl))
         Kav = rand(nl, nr) .* (10 .^ rand(3:7, nl, nr))
 
         old_res = polyfc(L0, KxStar, f, Rtot, LigC, Kav)
-        new_res = polyfc_via_polyc(L0, KxStar, f, Rtot, LigC, Kav)
+        new_res = polyfc_via_polyc(old_res.Req, L0, KxStar, f, Rtot, LigC, Kav)
 
         @test old_res.Lbound ≈ sum(new_res[1])
-        @test old_res.Rbound ≈ sum(new_res[2])
+        @test isapprox(old_res.Rbound, sum(new_res[2]), rtol = 1e-5)
     end
 end
 
@@ -87,26 +101,23 @@ end
 
     # f = 1
     Cplx = [1 0 0; 0 1 0; 0 0 1]
-    Ctheta = rand(3)
-    Ctheta = Ctheta / sum(Ctheta)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    θ = rand(3)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
     @test all(Lbounds .≈ Lfbnds)
     @test all(Lbounds .≈ sum(Rbounds, dims = 2))
     @test all(Lbounds .≈ Lmbnds)
 
     # f = 2
     Cplx = [2 0 0; 0 2 0; 0 0 2; 1 1 0; 1 0 1; 0 1 1]
-    Ctheta = rand(6)
-    Ctheta = Ctheta / sum(Ctheta)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    θ = rand(6)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
     @test all(Lbounds .≈ Lfbnds + Lmbnds)
     @test all(sum(Rbounds, dims = 2) .≈ Lfbnds * 2 + Lmbnds)
 
     # f = 3
     Cplx = [3 0 0; 2 1 0; 2 0 1; 1 2 0; 1 1 1; 1 0 2; 0 3 0; 0 2 1; 0 1 2; 0 0 3]
-    Ctheta = rand(10)
-    Ctheta = Ctheta / sum(Ctheta)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, Ctheta, Kav)
+    θ = rand(10)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
     Lbbnds = Lbounds - Lfbnds - Lmbnds
     @test all(sum(Rbounds, dims = 2) .≈ Lfbnds * 3 + Lbbnds * 2 + Lmbnds)
 end

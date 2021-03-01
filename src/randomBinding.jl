@@ -1,51 +1,44 @@
 
-mutable struct fcOutput{T}
+struct fcOutput{T}
     Lbound::T
     Rbound::T
     Rmulti::T
-    ActV::T
     Req::Vector{T}
     Rbound_n::Vector{T}
     Rmulti_n::Vector{T}
 end
 
 
-function polyfc(L0::Real, KxStar::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix, ActI = nothing)
+function polyfc_Req(Req::Vector, L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix)
     # Data consistency check
-    (ni, nr) = size(Kav)
-    @assert ni == length(IgGC)
-    @assert nr == length(Rtot)
+    @assert size(Kav) == (length(IgGC), length(Rtot))
+    ansType = promote_type(typeof(Kₓ), eltype(Kav), eltype(Req))
     IgGC /= sum(IgGC)
 
-    ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
-
-    Av = transpose(Kav) * IgGC * KxStar
-    f! = (F, x) -> F .= x + L0 * f / KxStar .* (x .* Av) .* (1 + sum(x .* Av))^(f - 1) - Rtot
-
-    Req = rootSolve(f!, convert(Vector{ansType}, Rtot))
-
-    ansType = promote_type(typeof(L0), typeof(KxStar), typeof(f), eltype(Rtot), eltype(IgGC))
-    Phi = ones(ansType, ni, nr + 1) .* IgGC
-    Phi[:, 1:nr] .*= Kav .* transpose(Req) .* KxStar
-    Phisum = sum(Phi[:, 1:nr])
-    Phisum_n = sum(Phi[:, 1:nr], dims = 1)
+    L0fK = L0 * f / Kₓ
+    Phi = ones(ansType, size(Kav, 1), size(Kav, 2) + 1) .* IgGC
+    Phi[:, 1:size(Kav, 2)] .*= Kav .* Req' .* Kₓ
+    Phisum_n = sum(Phi[:, 1:size(Kav, 2)], dims = 1)
+    Phisum = sum(Phisum_n)
 
     w = fcOutput{ansType}(
-        L0 / KxStar * ((1 + Phisum)^f - 1),
-        L0 / KxStar * f * Phisum * (1 + Phisum)^(f - 1),
-        L0 / KxStar * f * Phisum * ((1 + Phisum)^(f - 1) - 1),
-        NaN,
+        L0 / Kₓ * ((1 + Phisum)^f - 1),
+        sum(Rtot - Req),
+        L0fK * Phisum * ((1 + Phisum)^(f - 1) - 1),
         Req,
-        vec(L0 / KxStar * f .* Phisum_n * (1 + Phisum)^(f - 1)),
-        vec(L0 / KxStar * f .* Phisum_n * ((1 + Phisum)^(f - 1) - 1)),
+        vec(L0fK .* Phisum_n * (1 + Phisum)^(f - 1)),
+        vec(L0fK .* Phisum_n * ((1 + Phisum)^(f - 1) - 1)),
     )
-
-    if ActI != nothing
-        ActI = vec(ActI)
-        @assert nr == length(ActI)
-        w.ActV = max(dot(w.Rmulti_n, ActI), 0.0)
-    end
     return w
 end
 
-polyfcm = (KxStar, f, Rtot, IgG, Kav, ActI = nothing) -> polyfc(sum(IgG) / f, KxStar, f, Rtot, IgG ./ sum(IgG), Kav, ActI)
+
+function polyfc(args...)
+    ansType = promote_type(typeof(args[1]), typeof(args[2]), typeof(args[3]), eltype(args[4]), eltype(args[5]))
+    f! = (F, x) -> F .= args[4] .- polyfc_Req(x, args...).Rbound_n .- x
+    Req = rootSolve(f!, convert(Vector{ansType}, args[4]))
+    return polyfc_Req(Req, args...)
+end
+
+
+polyfcm = (Kₓ, f, Rtot, IgG, Kav) -> polyfc(sum(IgG) / f, Kₓ, f, Rtot, IgG ./ sum(IgG), Kav)
