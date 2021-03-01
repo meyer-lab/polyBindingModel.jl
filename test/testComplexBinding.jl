@@ -41,9 +41,9 @@ end
     for i = 1:10
         L0 = rand() * 10.0^rand(-15:-5)
         KxStar = rand() * 10.0^rand(-15:-5)
-        f = rand(2:6)
-        nl = rand(1:6)
-        nr = rand(1:6)
+        f = rand(2:5)
+        nl = rand(1:5)
+        nr = rand(1:5)
 
         Rtot = floor.(100 .+ rand(nr) .* (10 .^ rand(4:6, nr)))
         LigC = rand(nl) .* (10 .^ rand(1:2, nl))

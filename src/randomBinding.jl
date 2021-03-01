@@ -1,5 +1,5 @@
 
-mutable struct fcOutput{T}
+struct fcOutput{T}
     Lbound::T
     Rbound::T
     Rmulti::T
@@ -11,15 +11,13 @@ end
 
 function polyfc_Req(Req::Vector, L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix)
     # Data consistency check
-    @assert size(Kav, 1) == length(IgGC)
-    @assert size(Kav, 2) == length(Rtot)
-    ansType = promote_type(typeof(L0), typeof(Kₓ), typeof(f), eltype(Rtot), eltype(IgGC), eltype(Req))
-
+    @assert size(Kav) == (length(IgGC), length(Rtot))
+    ansType = promote_type(typeof(Kₓ), eltype(Kav), eltype(Req))
     IgGC /= sum(IgGC)
-    L0fK = L0 * f / Kₓ
 
+    L0fK = L0 * f / Kₓ
     Phi = ones(ansType, size(Kav, 1), size(Kav, 2) + 1) .* IgGC
-    Phi[:, 1:size(Kav, 2)] .*= Kav .* transpose(Req) .* Kₓ
+    Phi[:, 1:size(Kav, 2)] .*= Kav .* Req' .* Kₓ
     Phisum_n = sum(Phi[:, 1:size(Kav, 2)], dims = 1)
     Phisum = sum(Phisum_n)
 
