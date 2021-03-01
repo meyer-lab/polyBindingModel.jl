@@ -8,6 +8,7 @@
 
     @testset "Can successfully assemble the parameters and get a sane result." begin
         out = polyfc(L0, KxStar, f, Rtot, IgGC, Kav)
+        @btime polyfc($L0, $KxStar, $f, $Rtot, $IgGC, $Kav)
         # Mass balance
         @test all(out.Rbound_n .<= Rtot)
         @test all(out.Req .<= Rtot)

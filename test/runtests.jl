@@ -1,7 +1,6 @@
 using Test
-using Profile
+using BenchmarkTools
 using polyBindingModel
-using Random
 using ForwardDiff
 using LinearAlgebra
 
