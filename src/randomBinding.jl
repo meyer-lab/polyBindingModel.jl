@@ -28,7 +28,7 @@ function polyfc_Req(Req::Vector, L0::Real, Kₓ::Real, f::Number, Rtot::Vector, 
         sum(Rtot - Req),
         L0fK * Phisum * ((1 + Phisum)^(f - 1) - 1),
         Req,
-        vec(L0 / Kₓ * f .* Phisum_n * (1 + Phisum)^(f - 1)),
+        vec(L0fK .* Phisum_n * (1 + Phisum)^(f - 1)),
         vec(L0fK .* Phisum_n * ((1 + Phisum)^(f - 1) - 1)),
     )
     return w

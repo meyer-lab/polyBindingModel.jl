@@ -53,7 +53,7 @@ end
         new_res = polyfc_via_polyc(L0, KxStar, f, Rtot, LigC, Kav)
 
         @test old_res.Lbound ≈ sum(new_res[1])
-        @test old_res.Rbound ≈ sum(new_res[2])
+        @test isapprox(old_res.Rbound, sum(new_res[2]), rtol = 1e-6)
     end
 end
 
