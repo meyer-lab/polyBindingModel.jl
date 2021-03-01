@@ -7,7 +7,7 @@ using LinearAlgebra
 function rootSolve(f!, Rtot)
     local solve_res
     try
-        solve_res = nlsolve(f!, Rtot * 0.9, method = :newton, autodiff = :forward, iterations = 5000)
+        solve_res = nlsolve(f!, Rtot * 0.9, method = :newton, autodiff = :forward, iterations = 5000, ftol = 1e-10)
         @assert solve_res.f_converged == true
         @assert all(solve_res.zero .<= Rtot .+ eps())
         @assert all(-eps() .<= solve_res.zero)
