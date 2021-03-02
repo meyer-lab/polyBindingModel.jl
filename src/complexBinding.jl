@@ -4,12 +4,13 @@ function polyc_Req(Req::Vector, L0::Real, Kₓ::Real, Rtot::Vector, Cplx::Abstra
     @assert size(Kav, 2) == length(Rtot)
     θ /= sum(θ)
 
-    Psi = Kav .* Req' .* Kₓ
-    PsiRS = sum(Psi, dims = 2) .+ 1.0
-    Lbounds = L0 / Kₓ * θ .* expm1.(Cplx * log1p.(PsiRS .- 1))
-    Rbounds = L0 / Kₓ * θ .* Cplx * (Psi ./ PsiRS) .* exp.(Cplx * log1p.(PsiRS .- 1))
-    Lfbnds = L0 / Kₓ * θ .* exp.(Cplx * log.(PsiRS .- 1.0))
-    Lmbnds = L0 / Kₓ * θ .* Cplx * (PsiRS .- 1)
+    ψ = Kav .* Req' .* Kₓ
+    ψRS = sum(ψ, dims = 2) .+ 1.0
+    L0Kt = L0 / Kₓ * θ
+    Lbounds = L0Kt .* expm1.(Cplx * log.(ψRS))
+    Rbounds = L0Kt .* Cplx * (ψ ./ ψRS) .* exp.(Cplx * log.(ψRS))
+    Lfbnds = L0Kt .* exp.(Cplx * log.(ψRS .- 1.0))
+    Lmbnds = L0Kt .* Cplx * (ψRS .- 1.0)
 
     @assert length(Lbounds) == size(Cplx, 1)
     @assert size(Rbounds) == (length(θ), length(Rtot))
