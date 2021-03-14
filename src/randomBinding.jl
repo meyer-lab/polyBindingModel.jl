@@ -36,7 +36,16 @@ end
 function polyfc(args...)
     ansType = promote_type(typeof(args[1]), typeof(args[2]), typeof(args[3]), eltype(args[4]), eltype(args[5]))
     f! = (F, x) -> F .= args[4] .- polyfc_Req(x, args...).Rbound_n .- x
-    Req = rootSolve(f!, convert(Vector{ansType}, args[4]))
+
+    local Req
+    try
+        Req = rootSolve(f!, convert(Vector{ansType}, args[4]))
+    catch e
+        println("polyfc solving failed for args:")
+        println(args)
+        rethrow(e)
+    end
+
     return polyfc_Req(Req, args...)
 end
 
