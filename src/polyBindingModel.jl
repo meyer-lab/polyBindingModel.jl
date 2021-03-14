@@ -7,11 +7,12 @@ function rootSolve(f!, Rtot)
     local solve_res
     try
         solve_res = nlsolve(f!, Rtot, method = :newton, autodiff = :forward, ftol = 1e-9, xtol = 1e-10)
-        @assert solve_res.f_converged == true
+        @assert converged(solve_res) == true
         @assert all(solve_res.zero .<= Rtot .+ eps())
         @assert all(-eps() .<= solve_res.zero)
     catch e
-        println("Req solving failed")
+        println("Req solving failed:")
+        println(solve_res)
         rethrow(e)
     end
 
