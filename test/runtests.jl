@@ -43,7 +43,7 @@ end
 
 L0 = 1.0e-8
 KxStar = 1.0e-10
-Rtot = [100.0, 1000.0, 10.0, 10000.0]
+Rtot = [100.0, 1000.0, 10.0, 1000000.0]
 Kav = ones((3, 4)) * 1.0e6
 Kav[1, 2] = 1.0e9
 
@@ -54,7 +54,7 @@ Kav[1, 2] = 1.0e9
     @testset "Can successfully assemble the parameters and get a sane result." begin
         @btime polyfc($L0, $KxStar, 4, $Rtot, $IgGC, $Kav)
 
-        for ff in 1:20
+        for ff in 1:40
             out = polyfc(L0, KxStar, ff, Rtot, IgGC, Kav)
             # Mass balance
             @test all(out.Rbound_n .<= Rtot)
