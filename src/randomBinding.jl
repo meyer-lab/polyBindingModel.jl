@@ -10,12 +10,6 @@ struct fcOutput{T}
 end
 
 
-function phi_func(ϕs::Real, Rtot::Vector, L0::Real, Kₓ::Real, f::Number, A::Vector)
-    Req = Rtot ./ (1.0 .+ L0 * f * A * (1 + ϕs) ^ (f - 1))
-    return ϕs - Kₓ * dot(A, Req)
-end
-
-
 function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix)
     # Data consistency check
     ansType = promote_type(typeof(L0), typeof(Kₓ), typeof(f), eltype(Rtot), eltype(IgGC))
@@ -31,9 +25,14 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
     end
     L0fK = L0 * f / Kₓ
 
+    # Solve for Phisum
+    function phi_func(ϕs::Real)
+        ReqTemp = Rtot ./ (1.0 .+ L0 * f * A * (1 + ϕs) ^ (f - 1))
+        return ϕs - Kₓ * dot(A, ReqTemp)
+    end
+
     high = Kₓ * dot(A, Rtot)
-    func = x -> phi_func(x, Rtot, L0, Kₓ, f, A)
-    Phisum = find_zero(func, (convert(ansType, 0.0), convert(ansType, high)), Bisection())
+    Phisum = find_zero(phi_func, (convert(ansType, 0.0), convert(ansType, high)), Bisection())
 
     Req = Rtot ./ (1.0 .+ L0 * f * A * (1 + Phisum) ^ (f - 1))
     Phi = ones(ansType, size(Kav, 1), size(Kav, 2) + 1) .* IgGC
