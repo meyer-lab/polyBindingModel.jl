@@ -4,7 +4,7 @@
     f = 4
     Rtot = [100.0, 1000.0, 10.0, 10000.0]
     IgGC = [1.0, 0.1, 3.0]
-    Kav = ones((3, 4)) * 1.0e6
+    Kav = rand(3, 4) * 1.0e7
     Kav[1, 2] = 1.0e9
 
     @testset "randomBinding" begin

@@ -12,7 +12,7 @@ end
 
 function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix)
     # Data consistency check
-    ansType = promote_type(typeof(L0), typeof(Kₓ), typeof(f), eltype(Rtot), eltype(IgGC))
+    ansType = promote_type(typeof(L0), typeof(Kₓ), typeof(f), eltype(Rtot), eltype(IgGC), eltype(Kav))
     @assert size(Kav) == (length(IgGC), length(Rtot))
     @assert ndims(Kav) == 2
     IgGC /= sum(IgGC)
