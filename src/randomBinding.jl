@@ -24,20 +24,18 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
         A = vec(Kav)
     end
     L0fK = L0 * f / Kₓ
+    L0fA = L0 * f * A
 
     # Solve for Phisum
     function phi_func(ϕs::Real)
-        ReqTemp = Rtot ./ (1.0 .+ L0 * f * A * (1 + ϕs) ^ (f - 1))
-        return ϕs - Kₓ * dot(A, ReqTemp)
+        return ϕs - Kₓ * dot(A, Rtot ./ (1.0 .+ L0fA .* (1 .+ ϕs) .^ (f .- 1)))
     end
 
-    high = Kₓ * dot(A, Rtot)
-    Phisum = find_zero(phi_func, (convert(ansType, 0.0), convert(ansType, high)), Bisection())
+    bounds = (convert(ansType, 0.0), convert(ansType, Kₓ * dot(A, Rtot)))
+    Phisum = find_zero(phi_func, bounds, Bisection())
 
-    Req = Rtot ./ (1.0 .+ L0 * f * A * (1 + Phisum) ^ (f - 1))
-    Phi = ones(ansType, size(Kav, 1), size(Kav, 2) + 1) .* IgGC
-    Phi[:, 1:size(Kav, 2)] .*= Kav .* Req' .* Kₓ
-    Phisum_n = sum(Phi[:, 1:size(Kav, 2)], dims = 1)
+    Req = Rtot ./ (1.0 .+ L0fA * (1 + Phisum) ^ (f - 1))
+    Phisum_n = sum(ones(ansType, size(Kav, 1), size(Kav, 2)) .* IgGC .* Kav .* Req' .* Kₓ, dims = 1)
 
     w = fcOutput{ansType}(
         L0 / Kₓ * ((1 + Phisum)^f - 1),
