@@ -18,12 +18,12 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
     IgGC /= sum(IgGC)
 
     # More sanity checks
-    @assert L0 >= 0.0
-    @assert Kₓ >= 0.0
-    @assert f > 0.0
-    @assert all(Rtot .>= 0.0)
-    @assert all(IgGC .>= 0.0)
-    @assert all(Kav .>= 0.0)
+    @assert L0 >= 0.0 "L0 = $L0 < 0"
+    @assert Kₓ >= 0.0 "Kₓ = $Kₓ < 0"
+    @assert f > 0.0 "f = $f < 0"
+    @assert all(Rtot .>= 0.0) "Rtot = $Rtot .< 0"
+    @assert all(IgGC .>= 0.0) "IgGC = $IgGC .< 0"
+    @assert all(Kav .>= 0.0) "Kav = $Kav .< 0"
 
     # Setup constant terms
     if length(IgGC) > 1
