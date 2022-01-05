@@ -17,6 +17,14 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
     @assert ndims(Kav) == 2
     IgGC /= sum(IgGC)
 
+    # More sanity checks
+    @assert L0 >= 0.0
+    @assert Kₓ >= 0.0
+    @assert f > 0.0
+    @assert all(Rtot .>= 0.0)
+    @assert all(IgGC .>= 0.0)
+    @assert all(Kav .>= 0.0)
+
     # Setup constant terms
     if length(IgGC) > 1
         A = vec(Kav' * IgGC)
