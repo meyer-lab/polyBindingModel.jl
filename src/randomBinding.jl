@@ -15,7 +15,6 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
     ansType = promote_type(typeof(L0), typeof(Kₓ), typeof(f), eltype(Rtot), eltype(IgGC), eltype(Kav))
     @assert size(Kav) == (length(IgGC), length(Rtot))
     @assert ndims(Kav) == 2
-    IgGC /= sum(IgGC)
 
     # More sanity checks
     @assert L0 >= 0.0 "L0 = $L0 < 0"
@@ -24,6 +23,13 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
     @assert all(Rtot .>= 0.0) "Rtot = $Rtot .< 0"
     @assert all(IgGC .>= 0.0) "IgGC = $IgGC .< 0"
     @assert all(Kav .>= 0.0) "Kav = $Kav .< 0"
+    
+    if sum(IgGC) > 0.0
+        IgGC /= sum(IgGC)
+    else
+        L0 = 0.0
+        IgGC = ones(length(IgGC)) / length(IgGC)
+    end
 
     # Setup constant terms
     if length(IgGC) > 1
