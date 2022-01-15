@@ -17,12 +17,12 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
     @assert ndims(Kav) == 2
 
     # More sanity checks
-    @assert L0 >= 0.0 "L0 = $L0 < 0"
-    @assert Kₓ >= 0.0 "Kₓ = $Kₓ < 0"
-    @assert f > 0.0 "f = $f < 0"
-    @assert all(Rtot .>= 0.0) "Rtot = $Rtot .< 0"
-    @assert all(IgGC .>= 0.0) "IgGC = $IgGC .< 0"
-    @assert all(Kav .>= 0.0) "Kav = $Kav .< 0"
+    @assert 0.0 <= L0 < Inf "Can't have L0 = $L0"
+    @assert 0.0 <= Kₓ < Inf "Can't have Kₓ = $Kₓ"
+    @assert 0.0 < f < Inf "Can't have f = $f"
+    @assert all(0.0 .<= Rtot .< Inf) "Can't have Rtot = $Rtot"
+    @assert all(0.0 .<= IgGC .< Inf) "Can't have IgGC = $IgGC"
+    @assert all(0.0 .<= Kav .< Inf) "Can't have Kav = $Kav"
     
     if sum(IgGC) > 0.0
         IgGC /= sum(IgGC)

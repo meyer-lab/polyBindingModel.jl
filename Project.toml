@@ -1,6 +1,6 @@
 name = "polyBindingModel"
 uuid = "d8b71a59-0ce5-46cb-870e-e9e7240c6f77"
-authors = ["Aaron Meyer <a@ameyer.me>", "Cyrillus Tan"]
+authors = ["Aaron Meyer <a@ameyer.me>", "Cyrillus Tan <cyztan@gmail.com>"]
 version = "0.1.0"
 
 [deps]
