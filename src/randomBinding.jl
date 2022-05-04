@@ -45,10 +45,8 @@ function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav
         return ϕs - Kₓ * dot(A, Rtot ./ (1.0 .+ L0fA .* (1 .+ ϕs) .^ (f .- 1)))
     end
 
-    fx = ZeroProblem(phi_func, convert(ansType, 0.0))
-    Phisum = solve(fx, Roots.Order1(), atol=0.0, rtol=0.0)
-    @assert Phisum >= 0.0
-    @assert Phisum <= Kₓ * dot(A, Rtot)
+    bounds = (convert(ansType, 0.0), convert(ansType, Kₓ * dot(A, Rtot)))
+    Phisum = (bounds[1] < bounds[2]) ? find_zero(phi_func, bounds, Roots.A42()) : bounds[2]
 
     Req = Rtot ./ (1.0 .+ L0fA * (1 + Phisum) ^ (f - 1))
     Phisum_n = sum(ones(ansType, size(Kav, 1), size(Kav, 2)) .* IgGC .* Kav .* Req' .* Kₓ, dims = 1)
