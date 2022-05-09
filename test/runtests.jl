@@ -87,7 +87,9 @@ end
     # f = 1
     Cplx = [1 0 0; 0 1 0; 0 0 1]
     θ = rand(3)
-    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ / sum(θ), Kav)
+    θ = θ / sum(θ)
+    Lbounds, Rbounds, Lfbnds, Lmbnds = polyc(L0, KxStar, Rtot, Cplx, θ, Kav)
+    @btime polyc($L0, $KxStar, $Rtot, $Cplx, $θ, $Kav)
     @test all(Lbounds .≈ Lfbnds)
     @test all(Lbounds .≈ sum(Rbounds, dims = 2))
     @test all(Lbounds .≈ Lmbnds)
