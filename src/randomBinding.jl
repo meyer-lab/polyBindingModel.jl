@@ -13,8 +13,8 @@ end
 function polyfc(L0::Real, Kₓ::Real, f::Number, Rtot::Vector, IgGC::Vector, Kav::AbstractMatrix)
     # Data consistency check
     ansType = promote_type(typeof(L0), typeof(Kₓ), typeof(f), eltype(Rtot), eltype(IgGC), eltype(Kav))
-    @assert size(Kav) == (length(IgGC), length(Rtot))
-    @assert ndims(Kav) == 2
+    @assert size(Kav) == (length(IgGC), length(Rtot)) "Can't have Kav: $(size(Kav)), but IgGC: $(length(IgGC)) and Rtot: $(length(Rtot))"
+    @assert ndims(Kav) == 2 "Can't have ndims(Kav) == $(ndims(Kav))"
 
     # More sanity checks
     @assert 0.0 <= L0 < Inf "Can't have L0 = $L0"
